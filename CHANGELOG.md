@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.1.86] - 2026-11-28
+
+### Fixed
+
+- The built-in `github` skill now ships the current version of its vendored `surface` library (clearer error descriptions, narrower error handling, and values read from a response are redacted before they are printed). A test now fails if the vendored files and their manifest disagree, so a partial copy cannot ship. ([#15406](https://github.com/code-yeongyu/oh-my-openagent/pull/15406))
+- 5.1.85 was stamped but never published to npm: its release check found the Remote SDK bundle stale, because the release step did not rebuild that bundle after the version bump. The release step now rebuilds it, and 5.1.86 ships everything listed under 5.1.85. ([#15398](https://github.com/code-yeongyu/oh-my-openagent/pull/15398))
+- The onboarding apply request no longer surfaces the onboarding runtime's import error when that runtime cannot load at apply time; it answers `unavailable` with the missing file (`extensions/omo-onboarding-scan.js`) and the reinstall step. ([#15384](https://github.com/code-yeongyu/oh-my-openagent/pull/15384), part of [#15381](https://github.com/code-yeongyu/oh-my-openagent/issues/15381))
+- When the desktop's thread import or its onboarding "understanding" step fails, the reason it shows no longer carries an absolute path or an error's raw text. A failed scan names only its failure kind (for example `EACCES`), and a model call that could not start says so without the launcher's or the provider's message. ([#15366](https://github.com/code-yeongyu/oh-my-openagent/pull/15366), fixes [#15358](https://github.com/code-yeongyu/oh-my-openagent/issues/15358))
+
+### Changed
+
+- The SDK parity gate reads the merge base fail-closed: a path the merge base lacks reads as absent, and any other git failure fails the check instead of skipping the rule that depends on it. A pull request that changes the scenario runner or the tool registry is reported as a gate change, bound in the digest and accepted only with a signed review. ([#15217](https://github.com/code-yeongyu/oh-my-openagent/pull/15217))
+- The macOS live QA pool may use a host with a logged-in console user (R-S4-1): the guest it starts there is a headless clone with clipboard bridging off (`run --no-graphics --no-clipboard`), `--up` prints `console host <user|none>: headless no-clipboard guest`, and the run keeps zero host-input legs because every leg runs inside the guest. Each scenario carries the host's 1-minute load sampled while it ran, and the SET line records the highest leg load, the core count and the p99 of the legs that ran (`hostLoad=`, `cores=`, `p99Ms=`) beside a new `degraded=` count. A pass under a load above the core count, or under a load that could not be read, reads `DEGRADED` on its line and never counts in `pass=`, and a set whose passes are all degraded exits 3, never green. The scenario runner that samples the host load for each leg lands with part 2 of the macOS live tier. ([#15142](https://github.com/code-yeongyu/oh-my-openagent/pull/15142))
+
 ## [5.1.85] - 2026-11-28
 
 `omo daemon run --help` now prints usage without starting a daemon. The same applies to `--help` and `-h` for all daemon and host subcommands in npm and standalone installs. ([#15291](https://github.com/code-yeongyu/oh-my-openagent/pull/15291))
